@@ -1,0 +1,47 @@
+version: '3.5'
+
+services:
+  tg-bot-ozon:
+    image: 'tg_bot_ozon:latest'
+    build:
+      context: .
+    container_name: tg-bot-ozon
+    depends_on:
+      - tg-bot-ozon-db
+      - selenium-hub
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://tg-bot-ozon-db:5432/tg_bot_ozon_db
+      - SPRING_DATASOURCE_USERNAME=tg_bot_ozon_db
+      - SPRING_DATASOURCE_PASSWORD=postgres
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  tg-bot-ozon-db:
+    image: 'postgres:13.1-alpine'
+    container_name: tg-bot-ozon-db
+    environment:
+      - POSTGRES_USER=tg_bot_ozon_db
+      - POSTGRES_PASSWORD=postgres
+
+  chrome:
+                                #latest
+    image: selenium/node-chrome:4.10.0-20230607
+    container_name: selenium-chrome-ozon
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub-ozon
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+    ports:
+      - "7900:5900"
+
+  selenium-hub:
+                        #latest
+    image: selenium/hub:4.10.0-20230607
+    container_name: selenium-hub-ozon
+    ports:
+      - "4445:4442"
+      - "4446:4443"
+      - "4447:4444"
+
